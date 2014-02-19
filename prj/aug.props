@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <BaseDir>$(SolutionDir)..</BaseDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutDir>$(BaseDir)\bin</OutDir>
+    <IntDir>$(BaseDir)\obj</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(BaseDir)\src\hpp</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(BaseDir)\obj</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies />
+      <ManifestFile>$(BaseDir)\obj\$(TargetName)$(TargetExt).intermediate.manifest</ManifestFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="BaseDir">
+      <Value>$(BaseDir)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>
