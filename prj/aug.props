@@ -18,6 +18,13 @@
       <AdditionalDependencies />
       <ManifestFile>$(BaseDir)\obj\$(TargetName)$(TargetExt).intermediate.manifest</ManifestFile>
     </Link>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message />
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="BaseDir">

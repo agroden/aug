@@ -46,19 +46,30 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(BaseDir)\bin\</OutDir>
     <IntDir>$(BaseDir)\obj\</IntDir>
+    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(BaseDir)\ext\glfw\include;$(BaseDir)\ext\glew\include;$(BaseDir)\ext\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(BaseDir)\ext\glew\lib\Release\Win32;$(BaseDir)\ext\glfw\win32\lib-msvc120;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;glfw3dll.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(BaseDIr)\log\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <CustomBuildStep>
+      <Command>copy "$(BaseDir)\ext\glew\bin\Release\Win32\glew32.dll" "$(OutDir)" &amp; copy "$(BaseDir)\ext\glfw\win32\lib-msvc120\glfw3.dll" "$(OutDir)"</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>Copying DLLs to output directory</Message>
+      <Outputs>$(OutDir)\glew32.dll; $(OutDir)\glfw3.dll</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -77,4 +88,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="AfterClean">
+    <RemoveDir Directories="$(BaseDir)\obj; $(BaseDir)\bin" />
+  </Target>
 </Project>
