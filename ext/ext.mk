@@ -10,7 +10,7 @@ GLM_DIR:=$(EXT_DIR)/glm
 # file lists
 ################################################################################
 GLEW_LIB:=libglew
-GLFW_LIB:=libglfw3
+GLFW_LIB:=libglfw
 
 
 ################################################################################
@@ -23,7 +23,7 @@ else
 	uname:=$(shell uname -s)
 	ifeq ($(uname), Linux)
 		GLEW_LIB:=libGLEW.so
-		GLFW_LIB+=.so
+		GLFW_LIB:=libglfw.so
 	endif
 endif
 
@@ -31,7 +31,7 @@ endif
 ################################################################################
 # Targets
 ################################################################################
-EXT:=$(GLEW_DIR)/lib/$(GLEW_LIB)
+EXT:=$(GLEW_DIR)/lib/$(GLEW_LIB) $(GLFW_DIR)/lib/$(GLFW_LIB)
 
 # glew extensions
 $(GLEW_DIR)/src/glew.c:
@@ -44,14 +44,13 @@ $(GLEW_DIR)/lib/$(GLEW_LIB): $(GLEW_DIR)/src/glew.c
 
 # glfw config makefile
 $(GLFW_DIR)/Makefile:
-	cd $(GLFW_LIB) && cmake . -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/home/agroden/code/glfw/lib -DGLFW_BUILD_DOCS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_INSTALL=OFF
+	cd $(GLFW_DIR) && cmake . -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/home/agroden/code/glfw/lib -DGLFW_BUILD_DOCS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_INSTALL=OFF
 
 # glfw lib
 $(GLFW_DIR)/lib/$(GLFW_LIB): $(GLFW_DIR)/Makefile
 	@mkdir -p $(GLFW_DIR)/lib
-	cd $(GLFW_DIR) && \
-		make && \
-		$(CP) $(GLFW_DIR)/src/$(GLFW_LIB) $(GLFW_DIR)/lib/$(GLFW_DIR)/lib
+	cd $(GLFW_DIR) && make
+	$(CP) $(GLFW_DIR)/src/$(GLFW_LIB)* $(GLFW_DIR)/lib
 
 clean_glew:
 	cd $(GLEW_DIR)/auto && make destroy

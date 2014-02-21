@@ -30,7 +30,7 @@ int main(int argc, const char* argv[])
 	glfwMakeContextCurrent(win);
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_SAMPLES, 6);
@@ -132,7 +132,7 @@ int main(int argc, const char* argv[])
 	// Shaders
 	////////////////////////////////////////////////////////////////////////////
 	const char* vertex_shader =
-		"#version 400\n\
+		"#version 130\n\
 		layout(location = 0) in vec3 vp;\n\
 		uniform mat4 mvp;\n\
 		void main() {\n\
@@ -140,17 +140,40 @@ int main(int argc, const char* argv[])
 		}";
 
 	const char* gold_fs =
-		"#version 400\n\
+		"#version 130\n\
 		out vec4 color;\n\
 		void main() {\n\
 			\tcolor = vec4(1.0, 0.85, 0, 0.0);\n\
 		}";
+	GLint res = GL_FALSE;
+	int loglen = 0;	
+	
 	unsigned int vs = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vs, 1, &vertex_shader, NULL);
 	glCompileShader(vs);
+	glGetShaderiv(vs, GL_COMPILE_STATUS, &res);
+	glGetShaderiv(vs, GL_INFO_LOG_LENGTH, &loglen);
+	if (loglen > 0)
+	{
+		std::vector<char> errmsg(loglen + 1);
+		glGetShaderInfoLog(vs, loglen, NULL, &errmsg[0]);
+		std::cerr << "VERTEX SHADER: " << &errmsg[0] << "\n";
+		return 1;
+	}
+	
 	unsigned int fs = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fs, 1, &gold_fs, NULL);
 	glCompileShader(fs);
+	glGetShaderiv(fs, GL_COMPILE_STATUS, &res);
+	glGetShaderiv(fs, GL_INFO_LOG_LENGTH, &loglen);
+	if (loglen > 0)
+	{
+		std::vector<char> errmsg(loglen + 1);
+		glGetShaderInfoLog(fs, loglen, NULL, &errmsg[0]);
+		std::cerr << "FRAGMENT SHADER: " << &errmsg[0] << "\n";
+		return 1;
+	}
+	
 	unsigned int shader_prog = glCreateProgram();
 	glAttachShader(shader_prog, fs);
 	glAttachShader(shader_prog, vs);
@@ -159,15 +182,14 @@ int main(int argc, const char* argv[])
 	glDeleteShader(fs);
 
 	// check shader program
-	GLint res = GL_FALSE;
-	int loglen = 0;
 	glGetProgramiv(shader_prog, GL_LINK_STATUS, &res);
 	glGetProgramiv(shader_prog, GL_INFO_LOG_LENGTH, &loglen);
 	if (loglen > 0)
 	{
 		std::vector<char> errmsg(loglen + 1);
 		glGetProgramInfoLog(shader_prog, loglen, NULL, &errmsg[0]);
-		std::cerr << &errmsg[0] << "\n";
+		std::cerr << "SHADER PROGRAM: " << &errmsg[0] << "\n";
+		return 1;
 	}
 	
 	////////////////////////////////////////////////////////////////////////////

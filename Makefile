@@ -50,9 +50,10 @@ ifeq ($(OS), Windows_NT)
 else
 	uname:=$(shell uname -s)
 	ifeq ($(uname), Linux)
-		LIB+=-lGLEW -lglfw3 -lGL -lGLU
+		LIB+=-lGLEW -lglfw -lGL -lGLU
 		LIB+=-lX11 -lpthread -lXrandr -lXi -lXxf86vm  -lm
-		LDFLAGS+=-L$(EXT_DIR)/glew/lib
+		LDFLAGS+=-L$(GLEW_DIR)/lib -L$(GLFW_DIR)/lib
+		LDFLAGS+=-Wl,-rpath=$(GLEW_DIR)/lib,-rpath=$(GLFW_DIR)/lib
 	else ifeq ($(UNAME),Darwin)
 		LIB+=-framework OpenGL
 	endif
