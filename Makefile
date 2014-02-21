@@ -38,6 +38,7 @@ LD:=g++
 CP:=cp
 .DEFAULT_GOAL:=all
 
+
 ################################################################################
 # OS specifics
 ################################################################################
@@ -72,14 +73,13 @@ endif
 pre_build:
 
 $(OUT_DIR)/$(PRJ): $(EXT) $(OBJ) pre_build
-	echo $(EXT)
 	@mkdir -p $(OUT_DIR)
 	$(LD) -o $@ $(LDFLAGS) $(OBJ) $(LIB)
 
 post_build:
 ifeq ($(OS), Windows_NT)
-	$(CP) $(EXT_DIR)/glew/lib/glew32.dll $(OUT_DIR)
-	$(CP) $(EXT_DIR)/glfw/win32/lib-mingw/glfw3.dll $(OUT_DIR)
+	$(CP) $(GLEW_DIR)/lib/glew32.dll $(OUT_DIR)
+	$(CP) $(GLFW_DIR)/win32/lib-mingw/glfw3.dll $(OUT_DIR)
 endif
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRC_EXT)
