@@ -10,7 +10,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-int main(int argc, const char* argv)
+int main(int argc, const char* argv[])
 {
 	////////////////////////////////////////////////////////////////////////////
 	// Window Setup
@@ -67,7 +67,7 @@ int main(int argc, const char* argv)
 	//   |/         |/
 	//   +----------+
 	// (-.5,-.5,-.5) (.5,-.5,-.5)
-	std::array<float, 3*8> cube = {
+	std::array<float, (3*8)> cube = {{
 		-0.5, -0.5, -0.5, // front
 		-0.5, 0.5, -0.5,
 		0.5, 0.5, -0.5,
@@ -76,7 +76,7 @@ int main(int argc, const char* argv)
 		-0.5, 0.5, 0.5,
 		0.5, 0.5, 0.5,
 		0.5, -0.5, 0.5
-	};
+	}};
 
 	// cube vertex indicies:
 	//        5         6
@@ -90,7 +90,7 @@ int main(int argc, const char* argv)
 	//   |/        |/
 	//   +---------+
 	//  0         3
-	std::array<unsigned char, 2 * 3 * 6> cube_idx = {
+	std::array<unsigned char, (2*3*6)> cube_idx = {{
 		0, 1, 2, // front
 		0, 2, 3,
 		4, 5, 1, // left
@@ -103,7 +103,7 @@ int main(int argc, const char* argv)
 		1, 6, 2,
 		4, 0, 3, // bottom
 		4, 3, 7
-	};
+	}};
 
 	// vertex buffer object
 	unsigned int vbo = 0;
@@ -167,7 +167,7 @@ int main(int argc, const char* argv)
 	{
 		std::vector<char> errmsg(loglen + 1);
 		glGetProgramInfoLog(shader_prog, loglen, NULL, &errmsg[0]);
-		printf("%s\n", &errmsg[0]);
+		std::cerr << &errmsg[0] << "\n";
 	}
 	
 	////////////////////////////////////////////////////////////////////////////
