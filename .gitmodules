@@ -1,3 +1,6 @@
 [submodule "ext/glm"]
 	path = ext/glm
 	url = git@github.com:g-truc/glm.git
+[submodule "ext/glew"]
+	path = ext/glew
+	url = git@github.com:nigels-com/glew.git
