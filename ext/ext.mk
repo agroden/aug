@@ -21,7 +21,7 @@ GLLG_DIR:=$(EXT_DIR)/glLoadGen
 GLLG_OUT:=$(GL_SPEC)_$(GL_PROFILE)_$(GL_MAJOR_VER)_$(GL_MINOR_VER)
 # set per OS
 GLFW_LIB:=
-
+GEN_OBJ+=$(OBJ_DIR)/$(GLLG_OUT).o
 
 ################################################################################
 # tool options

@@ -31,8 +31,8 @@ OBJ:=$(addprefix $(OBJ_DIR)/, $(notdir $(SRC)))
 OBJ:=$(OBJ:.$(SRC_EXT)=.o)
 INC:=-I$(GLM_DIR) -I$(GLLG_DIR) -I$(GLFW_DIR)/include
 LIB:=
-# GLLG generates a source file
-OBJ+=$(OBJ_DIR)/$(GLLG_OUT).o
+# generated objects
+OBJ+=$(GEN_OBJ)
 
 ################################################################################
 # tool options
@@ -82,7 +82,7 @@ ifdef UNT_DIR
 endif
 
 pre_build: $(PRE_BUILD)
-	@echo "**** PRE BUILD ****"
+#	@echo "**** PRE BUILD ****"
 
 $(OUT_DIR):
 	$(MKDIR) -p $(OUT_DIR)
@@ -91,7 +91,7 @@ $(OUT_DIR)/$(PRJ): pre_build $(OBJ) $(OUT_DIR)
 	$(LD) -o $@ $(LDFLAGS) $(OBJ) $(LIB)
 
 post_build: $(POST_BUILD)
-	@echo "**** POST BUILD ****"
+#	@echo "**** POST BUILD ****"
 ifeq ($(OS), Windows_NT)
 	$(CP) $(GLFW_DIR)/lib/win32/lib-mingw/glfw3.dll $(OUT_DIR)
 endif
