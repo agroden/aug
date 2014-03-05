@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 
-#include <GL/glew.h>
+#include <gl_core_3_3.hpp>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -31,25 +31,35 @@ int main(int argc, const char* argv[])
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_SAMPLES, 6);
 
-	// init glew
-	glewExperimental = GL_TRUE;
-	glewInit();
+	// init glLoadGen
+	gl::exts::LoadTest loaded = gl::sys::LoadFunctions();
+	if(!loaded)
+	{
+		std::cerr << "could not init opengl functions" << std::endl;
+		return 1;
+	}
+	/*int loaded = ogl_LoadFunctions();
+	if (loaded == ogl_LOAD_FAILED)
+	{
+		std::cerr << "could not init opengl functions" << std::endl;
+		return 1;
+	}*/
 
-	const GLubyte* renderer = glGetString(GL_RENDERER);
-	const GLubyte* version = glGetString(GL_VERSION);
+	const GLubyte* renderer = gl::GetString(gl::RENDERER);
+	const GLubyte* version = gl::GetString(gl::VERSION);
 	std::cout << "Renderer: " << renderer << "\n";
 	std::cout << "OpenGL version supported: " << version << "\n";
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	gl::Enable(gl::DEPTH_TEST);
+	gl::DepthFunc(gl::LESS);
 
 	// set skybox color
 	// dark blue
-	glClearColor(0.0f, 0.0f, 0.06f, 0.0f);
+	gl::ClearColor(0.0f, 0.0f, 0.06f, 0.0f);
 
 	////////////////////////////////////////////////////////////////////////////
 	// Vertext Buffers
@@ -107,89 +117,102 @@ int main(int argc, const char* argv[])
 
 	// vertex buffer object
 	unsigned int vbo = 0;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, cube.size() * sizeof(float),
-		cube.data(), GL_STATIC_DRAW);
+	gl::GenBuffers(1, &vbo);
+	gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+	gl::BufferData(gl::ARRAY_BUFFER, cube.size() * sizeof(float),
+		cube.data(), gl::STATIC_DRAW);
 
 	// vertex attribute object
 	unsigned int vao = 0;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	gl::GenVertexArrays(1, &vao);
+	gl::BindVertexArray(vao);
+	gl::EnableVertexAttribArray(0);
+	gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+	gl::VertexAttribPointer(0, 3, gl::FLOAT, false, 0, NULL);
 
 	// index buffer
 	unsigned int ibo;
-	glGenBuffers(1, &ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+	gl::GenBuffers(1, &ibo);
+	gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ibo);
+	gl::BufferData(gl::ELEMENT_ARRAY_BUFFER,
 		cube_idx.size() * sizeof(unsigned char), cube_idx.data(),
-		GL_STATIC_DRAW);
+		gl::STATIC_DRAW);
 
 	////////////////////////////////////////////////////////////////////////////
 	// Shaders
 	////////////////////////////////////////////////////////////////////////////
+	//layout(location = 0) 
 	const char* vertex_shader =
-		"#version 130\n\
+		"#version 330 core\n\
 		layout(location = 0) in vec3 vp;\n\
 		uniform mat4 mvp;\n\
 		void main() {\n\
-			\tgl_Position = mvp * vec4(vp, 1);\n\
+			\tgl_Position = mvp * vec4 (vp, 1);\n\
 		}";
 
 	const char* gold_fs =
-		"#version 130\n\
+		"#version 330 core\n\
 		out vec4 color;\n\
 		void main() {\n\
 			\tcolor = vec4(1.0, 0.85, 0, 0.0);\n\
 		}";
-	GLint res = GL_FALSE;
-	int loglen = 0;	
 	
-	unsigned int vs = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vs, 1, &vertex_shader, NULL);
-	glCompileShader(vs);
-	glGetShaderiv(vs, GL_COMPILE_STATUS, &res);
-	glGetShaderiv(vs, GL_INFO_LOG_LENGTH, &loglen);
-	if (loglen > 0)
+	GLint res = gl::FALSE_;
+	int loglen = 0;
+	
+	unsigned int vs = gl::CreateShader(gl::VERTEX_SHADER);
+	gl::ShaderSource(vs, 1, &vertex_shader, NULL);
+	gl::CompileShader(vs);
+	gl::GetShaderiv(vs, gl::COMPILE_STATUS, &res);
+	if (res == gl::FALSE_)
 	{
-		std::vector<char> errmsg(loglen + 1);
-		glGetShaderInfoLog(vs, loglen, NULL, &errmsg[0]);
-		std::cerr << "VERTEX SHADER: " << &errmsg[0] << "\n";
-		return 1;
+		gl::GetShaderiv(vs, gl::INFO_LOG_LENGTH, &loglen);
+		if (loglen > 0)
+		{
+			std::vector<char> errmsg(loglen + 1);
+			gl::GetShaderInfoLog(vs, loglen, NULL, &errmsg[0]);
+			std::cerr << "VERTEX SHADER: " << &errmsg[0] << "\n";
+			return 1;
+		}
 	}
 	
-	unsigned int fs = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fs, 1, &gold_fs, NULL);
-	glCompileShader(fs);
-	glGetShaderiv(fs, GL_COMPILE_STATUS, &res);
-	glGetShaderiv(fs, GL_INFO_LOG_LENGTH, &loglen);
-	if (loglen > 0)
+	res = gl::FALSE_;
+	unsigned int fs = gl::CreateShader(gl::FRAGMENT_SHADER);
+	gl::ShaderSource(fs, 1, &gold_fs, NULL);
+	gl::CompileShader(fs);
+	gl::GetShaderiv(fs, gl::COMPILE_STATUS, &res);
+	if (res == gl::FALSE_)
 	{
-		std::vector<char> errmsg(loglen + 1);
-		glGetShaderInfoLog(fs, loglen, NULL, &errmsg[0]);
-		std::cerr << "FRAGMENT SHADER: " << &errmsg[0] << "\n";
-		return 1;
+		gl::GetShaderiv(fs, gl::INFO_LOG_LENGTH, &loglen);
+		if (loglen > 0)
+		{
+			std::vector<char> errmsg(loglen + 1);
+			gl::GetShaderInfoLog(fs, loglen, NULL, &errmsg[0]);
+			std::cerr << "FRAGMENT SHADER: " << &errmsg[0] << "\n";
+			return 1;
+		}
 	}
 	
-	unsigned int shader_prog = glCreateProgram();
-	glAttachShader(shader_prog, fs);
-	glAttachShader(shader_prog, vs);
-	glLinkProgram(shader_prog);
-	glDeleteShader(vs);
-	glDeleteShader(fs);
+	unsigned int shader_prog = gl::CreateProgram();
+	gl::AttachShader(shader_prog, fs);
+	gl::AttachShader(shader_prog, vs);
+	gl::LinkProgram(shader_prog);
+	gl::DeleteShader(vs);
+	gl::DeleteShader(fs);
 
 	// check shader program
-	glGetProgramiv(shader_prog, GL_LINK_STATUS, &res);
-	glGetProgramiv(shader_prog, GL_INFO_LOG_LENGTH, &loglen);
-	if (loglen > 0)
+	res = gl::FALSE_;
+	gl::GetProgramiv(shader_prog, gl::LINK_STATUS, &res);
+	if (res == gl::FALSE_)
 	{
-		std::vector<char> errmsg(loglen + 1);
-		glGetProgramInfoLog(shader_prog, loglen, NULL, &errmsg[0]);
-		std::cerr << "SHADER PROGRAM: " << &errmsg[0] << "\n";
-		return 1;
+		gl::GetProgramiv(shader_prog, gl::INFO_LOG_LENGTH, &loglen);
+		if (loglen > 0)
+		{
+			std::vector<char> errmsg(loglen + 1);
+			gl::GetProgramInfoLog(shader_prog, loglen, NULL, &errmsg[0]);
+			std::cerr << "SHADER PROGRAM: " << &errmsg[0] << "\n";
+			return 1;
+		}
 	}
 	
 	////////////////////////////////////////////////////////////////////////////
@@ -205,21 +228,21 @@ int main(int argc, const char* argv[])
 	glm::mat4 model = glm::mat4(1.0f);
 	glm::mat4 mvp = projection * view * model;
 	// pass mvp to shader program
-	GLuint matrix_id = glGetUniformLocation(shader_prog, "mvp");
-	glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &mvp[0][0]);
+	GLuint matrix_id = gl::GetUniformLocation(shader_prog, "mvp");
+	gl::UniformMatrix4fv(matrix_id, 1, false, &mvp[0][0]);
 
 	////////////////////////////////////////////////////////////////////////////
 	// Drawing Loop
 	////////////////////////////////////////////////////////////////////////////
 	while (!glfwWindowShouldClose(win))
 	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glUseProgram(shader_prog);
-		glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &mvp[0][0]);
-		glBindVertexArray(vao);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-		glDrawElements(GL_TRIANGLES, cube_idx.size(), GL_UNSIGNED_BYTE, 0);
+		gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
+		gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE);
+		gl::UseProgram(shader_prog);
+		gl::UniformMatrix4fv(matrix_id, 1, false, &mvp[0][0]);
+		gl::BindVertexArray(vao);
+		gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ibo);
+		gl::DrawElements(gl::TRIANGLES, cube_idx.size(), gl::UNSIGNED_BYTE, 0);
 
 		// required for glfw event processing
 		glfwPollEvents();
@@ -229,10 +252,10 @@ int main(int argc, const char* argv[])
 	////////////////////////////////////////////////////////////////////////////
 	// Cleanup
 	////////////////////////////////////////////////////////////////////////////
-	glDeleteBuffers(1, &vbo);
-	glDeleteBuffers(1, &ibo);
-	glDeleteProgram(shader_prog);
-	glDeleteVertexArrays(1, &vao);
+	gl::DeleteBuffers(1, &vbo);
+	gl::DeleteBuffers(1, &ibo);
+	gl::DeleteProgram(shader_prog);
+	gl::DeleteVertexArrays(1, &vao);
 
 	glfwTerminate();
 	return 0;
