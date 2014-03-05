@@ -42,12 +42,6 @@ int main(int argc, const char* argv[])
 		std::cerr << "could not init opengl functions" << std::endl;
 		return 1;
 	}
-	/*int loaded = ogl_LoadFunctions();
-	if (loaded == ogl_LOAD_FAILED)
-	{
-		std::cerr << "could not init opengl functions" << std::endl;
-		return 1;
-	}*/
 
 	const GLubyte* renderer = gl::GetString(gl::RENDERER);
 	const GLubyte* version = gl::GetString(gl::VERSION);
