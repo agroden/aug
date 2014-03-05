@@ -1,64 +1,73 @@
 ################################################################################
+# base vars
+################################################################################
+GL_SPEC:=gl
+GL_PROFILE:=core
+GL_MAJOR_VER:=3
+GL_MINOR_VER:=3
+
+
+################################################################################
 # directories
 ################################################################################
 GLEW_DIR:=$(EXT_DIR)/glew
 GLFW_DIR:=$(EXT_DIR)/glfw
 GLM_DIR:=$(EXT_DIR)/glm
+GLLG_DIR:=$(EXT_DIR)/glLoadGen
 
 
 ################################################################################
 # file lists
 ################################################################################
-GLEW_LIB:=libglew
-GLFW_LIB:=libglfw
+GLLG_OUT:=$(GL_SPEC)_$(GL_PROFILE)_$(GL_MAJOR_VER)_$(GL_MINOR_VER)
+# set per OS
+GLFW_LIB:=
+
+
+################################################################################
+# tool options
+################################################################################
+LUA:=lua
+GLLG_FLAGS:=$(GL_PROFILE)_$(GL_MAJOR_VER)_$(GL_MINOR_VER) \
+-spec=$(GL_SPEC) \
+-style=pointer_cpp \
+-version=$(GL_MAJOR_VER).$(GL_MINOR_VER) \
+-profile=$(GL_PROFILE) \
+-stdext=gl_ubiquitous.txt
+-stdext=gl_core_post_3_3.txt
 
 
 ################################################################################
 # OS specifics
 ################################################################################
 ifeq ($(OS), Windows_NT)
-	GLEW_LIB+=.dll
-	GLFW_LIB+=dll.a
+	GLFW_LIB:=win64/lib-mingw/glfw3.dll
+	#GLFW_CMAKE_FLAGS+=-G"MSYS Makefiles"
+	#GLLG_FLAGS+=-spec=wgl -stdext=wgl_common.txt
+	LUA:=lua.exe
 else
 	uname:=$(shell uname -s)
 	ifeq ($(uname), Linux)
-		GLEW_LIB:=libGLEW.so
 		GLFW_LIB:=libglfw.so
+		#GLLG_FLAGS+=-spec=glx -stdext=glx_common.txt
 	endif
 endif
 
 
 ################################################################################
-# Targets
+# targets
 ################################################################################
-EXT:=$(GLEW_DIR)/lib/$(GLEW_LIB) $(GLFW_DIR)/lib/$(GLFW_LIB)
+EXT:=$(GLLG_DIR)/$(GLLG_OUT).cpp
 
-# glew extensions
-$(GLEW_DIR)/src/glew.c:
-	cd $(GLEW_DIR) && make extensions
+# glLoadGen source file
+$(GLLG_DIR)/$(GLLG_OUT).cpp: $(GLLG_DIR)/$(GLLG_OUT).hpp
 
-# glew lib
-$(GLEW_DIR)/lib/$(GLEW_LIB): $(GLEW_DIR)/src/glew.c
-	echo $@
-	cd $(GLEW_DIR); make
+# glLoadGen header
+$(GLLG_DIR)/$(GLLG_OUT).hpp:
+	cd $(GLLG_DIR) && $(LUA) LoadGen.lua $(GLLG_FLAGS)
 
-# glfw config makefile
-$(GLFW_DIR)/Makefile:
-	cd $(GLFW_DIR) && cmake . -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/home/agroden/code/glfw/lib -DGLFW_BUILD_DOCS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_INSTALL=OFF
+# glLoadGen clean
+clean_glLoadGen:
+	$(RM) -rf $(GLLG_DIR)/$(GLLG_OUT).*
 
-# glfw lib
-$(GLFW_DIR)/lib/$(GLFW_LIB): $(GLFW_DIR)/Makefile
-	@mkdir -p $(GLFW_DIR)/lib
-	cd $(GLFW_DIR) && make
-	$(CP) $(GLFW_DIR)/src/$(GLFW_LIB)* $(GLFW_DIR)/lib
-
-clean_glew:
-	cd $(GLEW_DIR)/auto && make destroy
-	cd $(GLEW_DIR) && make clean
-
-clean_glfw:
-	cd $(GLFW_DIR) && make clean
-	$(RM) -rf $(GLFW_DIR)/*.cmake
-	$(RM) -rf $(GLFW_DIR)/CMakeFiles
-
-clean_ext: clean_glew clean_glfw
+clean_ext: clean_glLoadGen
