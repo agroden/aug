@@ -16,6 +16,10 @@ EXT_DIR:=$(CURDIR)/ext
 OUT_DIR:=$(BIN_DIR)
 # add for unit tests
 #UNT_DIR:=$(CURDIR)/unit_tests
+
+################################################################################
+# includes
+################################################################################
 include $(EXT_DIR)/ext.mk
 
 
@@ -27,7 +31,8 @@ OBJ:=$(addprefix $(OBJ_DIR)/, $(notdir $(SRC)))
 OBJ:=$(OBJ:.$(SRC_EXT)=.o)
 INC:=-I$(GLM_DIR) -I$(GLLG_DIR) -I$(GLFW_DIR)/include
 LIB:=
-
+# GLLG generates a source file
+OBJ+=$(OBJ_DIR)/$(GLLG_OUT).o
 
 ################################################################################
 # tool options
@@ -66,7 +71,7 @@ endif
 ################################################################################
 # Targets
 ################################################################################
-PRE_BUILD:=$(SRC_DIR)/$(GLLG_OUT).$(SRC_EXT)
+PRE_BUILD:=
 POST_BUILD:=
 all: $(EXT) pre_build $(OUT_DIR)/$(PRJ) post_build
 
@@ -76,11 +81,8 @@ ifdef UNT_DIR
 	@if [ -d $(UNT_DIR) ]; then cd $(UNT_DIR); make debug; fi
 endif
 
-$(SRC_DIR)/$(GLLG_OUT).$(SRC_EXT):
-	$(CP) $(GLLG_DIR)/$(GLLG_OUT).$(SRC_EXT) $(SRC_DIR)
-
 pre_build: $(PRE_BUILD)
-	@echo "PRE BUILD"
+	@echo "**** PRE BUILD ****"
 
 $(OUT_DIR):
 	$(MKDIR) -p $(OUT_DIR)
@@ -89,7 +91,7 @@ $(OUT_DIR)/$(PRJ): pre_build $(OBJ) $(OUT_DIR)
 	$(LD) -o $@ $(LDFLAGS) $(OBJ) $(LIB)
 
 post_build: $(POST_BUILD)
-	@echo "POST BUILD"
+	@echo "**** POST BUILD ****"
 ifeq ($(OS), Windows_NT)
 	$(CP) $(GLFW_DIR)/lib/win32/lib-mingw/glfw3.dll $(OUT_DIR)
 endif

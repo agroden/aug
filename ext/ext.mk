@@ -10,7 +10,6 @@ GL_MINOR_VER:=3
 ################################################################################
 # directories
 ################################################################################
-GLEW_DIR:=$(EXT_DIR)/glew
 GLFW_DIR:=$(EXT_DIR)/glfw
 GLM_DIR:=$(EXT_DIR)/glm
 GLLG_DIR:=$(EXT_DIR)/glLoadGen
@@ -57,7 +56,13 @@ endif
 ################################################################################
 # targets
 ################################################################################
-EXT:=$(GLLG_DIR)/$(GLLG_OUT).cpp
+EXT:=$(OBJ_DIR)/$(GLLG_OUT).o
+
+#$(SRC_DIR)/$(GLLG_OUT).$(SRC_EXT): $(GLLG_DIR)/$(GLLG_OUT).cpp
+#	$(CP) $(GLLG_DIR)/$(GLLG_OUT).$(SRC_EXT) $(SRC_DIR)
+
+$(OBJ_DIR)/$(GLLG_OUT).o: $(GLLG_DIR)/$(GLLG_OUT).cpp $(OBJ_DIR)
+	$(CXX) -o $@ -c $< $(CXXFLAGS) $(INC)
 
 # glLoadGen source file
 $(GLLG_DIR)/$(GLLG_OUT).cpp: $(GLLG_DIR)/$(GLLG_OUT).hpp
